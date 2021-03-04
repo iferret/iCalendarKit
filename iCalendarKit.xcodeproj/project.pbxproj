@@ -10,7 +10,7 @@
 		C74A0E9D25EF8A65007E3D25 /* Compatible.swift in Sources */ = {isa = PBXBuildFile; fileRef = C74A0E9C25EF8A65007E3D25 /* Compatible.swift */; };
 		C74A0EA025EF8B16007E3D25 /* String+Hub.swift in Sources */ = {isa = PBXBuildFile; fileRef = C74A0E9F25EF8B16007E3D25 /* String+Hub.swift */; };
 		C774EBFA25F077C4000DD25B /* NSLock+Hub.swift in Sources */ = {isa = PBXBuildFile; fileRef = C774EBF925F077C4000DD25B /* NSLock+Hub.swift */; };
-		C7B84A4325EF4FE60025ABCB /* CKToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B84A4225EF4FE60025ABCB /* CKToDo.swift */; };
+		C7B84A4325EF4FE60025ABCB /* CKTodo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B84A4225EF4FE60025ABCB /* CKTodo.swift */; };
 		C7B84A4725EF53320025ABCB /* CKJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B84A4625EF53320025ABCB /* CKJournal.swift */; };
 		C7B84A4A25EF55AF0025ABCB /* CKFreeBusy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B84A4925EF55AF0025ABCB /* CKFreeBusy.swift */; };
 		C7B84A4D25EF577E0025ABCB /* CKTimezone.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B84A4C25EF577D0025ABCB /* CKTimezone.swift */; };
@@ -66,7 +66,7 @@
 		C74A0E9C25EF8A65007E3D25 /* Compatible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Compatible.swift; sourceTree = "<group>"; };
 		C74A0E9F25EF8B16007E3D25 /* String+Hub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Hub.swift"; sourceTree = "<group>"; };
 		C774EBF925F077C4000DD25B /* NSLock+Hub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLock+Hub.swift"; sourceTree = "<group>"; };
-		C7B84A4225EF4FE60025ABCB /* CKToDo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKToDo.swift; sourceTree = "<group>"; };
+		C7B84A4225EF4FE60025ABCB /* CKTodo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKTodo.swift; sourceTree = "<group>"; };
 		C7B84A4625EF53320025ABCB /* CKJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKJournal.swift; sourceTree = "<group>"; };
 		C7B84A4925EF55AF0025ABCB /* CKFreeBusy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKFreeBusy.swift; sourceTree = "<group>"; };
 		C7B84A4C25EF577D0025ABCB /* CKTimezone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKTimezone.swift; sourceTree = "<group>"; };
@@ -191,7 +191,7 @@
 				C7F1356425EF14840076D9A7 /* CKSerialization.swift */,
 				C7B84A4F25EF5B1F0025ABCB /* CKStandard.swift */,
 				C7B84A4C25EF577D0025ABCB /* CKTimezone.swift */,
-				C7B84A4225EF4FE60025ABCB /* CKToDo.swift */,
+				C7B84A4225EF4FE60025ABCB /* CKTodo.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -330,7 +330,7 @@
 				C7F1356525EF14840076D9A7 /* CKSerialization.swift in Sources */,
 				C7F1355E25EF13EB0076D9A7 /* CKCalendar.swift in Sources */,
 				C7F1357D25EF31970076D9A7 /* CKTextable.swift in Sources */,
-				C7B84A4325EF4FE60025ABCB /* CKToDo.swift in Sources */,
+				C7B84A4325EF4FE60025ABCB /* CKTodo.swift in Sources */,
 				C774EBFA25F077C4000DD25B /* NSLock+Hub.swift in Sources */,
 				C7B84A5025EF5B1F0025ABCB /* CKStandard.swift in Sources */,
 				C7F1355B25EF13DD0076D9A7 /* CKEvent.swift in Sources */,

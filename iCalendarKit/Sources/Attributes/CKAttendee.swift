@@ -9,48 +9,21 @@ import Foundation
 
 
 extension CKAttendee {
-    
-    /// Default is INDIVIDUAL
-    public enum CUTYPE: String {
-        /// An individual
-        case INDIVIDUAL
-        /// A group of individuals
-        case GROUP
-        /// A physical resource
-        case RESOURCE
-        /// A room resource
-        case ROOM
-        /// Otherwise not known
-        case UNKNOWN
+    /// Key
+    public struct Key: Hashable {
+        public let rawValue: String
     }
-    
-    /// PARTSTAT
-    public enum PARTSTAT: String {
-        case NEEDSACTION = "NEEDS-ACTION"
-        case ACCEPTED
-        case DECLINED
-        case TENTATIVE
-        case DELEGATED
-    }
-    
-    /// Default is REQ-PARTICIPANT
-    public enum ROLE: String {
-        /// Indicates chair of the calendar entity
-        case CHAIR
-        /// Indicates a participant whose participation is required
-        case REQPARTICIPANT = "REQ-PARTICIPANT"
-        /// Indicates a participant whose participation is optional
-        case OPTPARTICIPANT = "OPT-PARTICIPANT"
-        /// Indicates a participant who is copied for information
-        case NONPARTICIPANT = "NON-PARTICIPANT"
-    }
-    
-    /// Default is FALSE
-    public enum RSVP: String {
-        case TRUE
-        case FALSE
-    }
-    
+}
+
+extension CKAttendee.Key {
+    /// CUTYPE values => "INDIVIDUAL", "GROUP", "RESOURCE", "ROOM", "UNKNOWN"
+    public static var CUTYPE: CKAttendee.Key { .init(rawValue: "CUTYPE") }
+    /// PARTSTAT values => "NEEDS-ACTION", "ACCEPTED", "DECLINED", "TENTATIVE", "DELEGATED"
+    public static var PARTSTAT: CKAttendee.Key { .init(rawValue: "PARTSTAT") }
+    /// ROLE values => "CHAIR", "REQ-PARTICIPANT", "OPT-PARTICIPANT", "NON-PARTICIPANT"
+    public static var ROLE: CKAttendee.Key { .init(rawValue: "ROLE") }
+    /// RSVP values => "TRUE", "FALSE"
+    public static var RSVP: CKAttendee.Key { .init(rawValue: "RSVP") }
 }
 
 
@@ -61,7 +34,11 @@ public class CKAttendee: CKAttribute {
     /// - Parameters:
     ///   - value: String
     ///   - attributes: [String: String]
-    public init(value: String, attributes: [String: String]) {
-        super.init(name: "ATTENDEE", value: value, attrs: attributes)
+    public init(value: String, attributes: [Key: String]) {
+        var attrs: [String: String] = [:]
+        attributes.forEach { (key, value) in
+            attrs[key.rawValue] = value
+        }
+        super.init(name: "ATTENDEE", value: value, attrs: attrs)
     }
 }

@@ -39,6 +39,15 @@ extension CompatibleWrapper where Base == String {
         return (base as NSString).substring(with: range)
     }
     
+    /// remove with range
+    /// - Parameter range: NSRange
+    /// - Returns: String
+    internal func remove(with range: NSRange) -> String {
+        let prefix = (base as NSString).substring(to: range.location)
+        let suffix = (base as NSString).substring(from: range.location + range.length)
+        return prefix + suffix
+    }
+    
     /// hasPrefix
     /// - Parameter prefixs: [String]
     /// - Returns: Bool

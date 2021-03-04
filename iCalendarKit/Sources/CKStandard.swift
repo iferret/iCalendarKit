@@ -63,8 +63,9 @@ public class CKStandard {
     /// - Parameter contents: String
     /// - Throws: throws
     public init(from contents: String) throws {
+        var contents = contents
         // 1. get attrs
-        attributes = try attributes(from: contents)
+        attributes = try attributes(from: &contents)
     }
     
     
@@ -76,36 +77,38 @@ extension CKStandard {
     /// - Parameter contents: String
     /// - Throws: String
     /// - Returns: [CKAttribute]
-    private func attributes(from contents: String) throws -> [CKAttribute] {
+    private func attributes(from contents: inout String) throws -> [CKAttribute] {
         var attrs: [CKAttribute] = []
         for key in AttributeKey.allCases {
             let reg = try NSRegularExpression.init(pattern: key.pattern, options: [.caseInsensitive])
             if key.mutable == true {
-                let results = reg.matches(in: contents, options: [], range: contents.hub.range)
-                guard results.isEmpty == true else { continue }
+                let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+                guard results.isEmpty == false else { continue }
                 for result in results {
                     let content = contents.hub.substring(with: result.range)
                     let attr = try CKAttribute.init(from: content)
                     attrs.append(attr)
+                    contents = contents.hub.remove(with: result.range)
                 }
             } else {
                 guard let result = reg.firstMatch(in: contents, options: [], range: contents.hub.range) else { continue }
                 let content = contents.hub.substring(with: result.range)
                 let attr = try CKAttribute.init(from: content)
                 attrs.append(attr)
+                contents = contents.hub.remove(with: result.range)
             }
         }
         // 获取自定义
         // X-PROP / IANA-PROP
         let pattern: String = #"(\r\n)(X-|IANA-)([\s\S]*?)(\r\n)"#
         let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range)
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
         for result in results {
             let content = contents.hub.substring(with: result.range)
             let attr = try CKAttribute.init(from: content)
             attrs.append(attr)
+            contents = contents.hub.remove(with: result.range)
         }
-        
         return attrs
     }
 }

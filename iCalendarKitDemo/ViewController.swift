@@ -36,14 +36,11 @@ class ViewController: UIViewController {
          
          */
         
-        guard let url = Bundle.main.url(forResource: "ATT00001", withExtension: "ics") else { return }
+        guard let url = Bundle.main.url(forResource: "ATT00002", withExtension: "ics") else { return }
         do {
             let serialization = try CKSerialization.init(with: url)
             let calendars = try serialization.calendars()
             calendars.forEach { (cal) in
-                cal.add(.init(value: "adsfadasdfasd"), for: "X-ADDDD")
-                cal.add(.init(value: "adsfadasdfasd"), for: "X-BDDDD")
-                cal.add(.init(value: "adsfadasdfasd"), for: "X-CDDDD")
                 print(cal.text)
             }
         } catch {

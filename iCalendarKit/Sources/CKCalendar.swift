@@ -45,8 +45,8 @@ public class CKCalendar {
     public private(set) var timezones: [CKTimezone] = []
     /// [CKEvent]
     public private(set) var events: [CKEvent] = []
-    /// [CKToDo]
-    public private(set) var todos: [CKToDo] = []
+    /// [CKTodo]
+    public private(set) var todos: [CKTodo] = []
     /// [CKJournal]
     public private(set) var journals: [CKJournal] = []
     /// [CKFreeBusy]
@@ -63,18 +63,21 @@ public class CKCalendar {
     /// - Parameter contents: String
     /// - Throws: throws
     public init(with contents: String) throws {
-        // 1. 解析属性
-        attributes = try attributes(from: contents)
-        // 1.1 时区信息
-        timezones = try timezones(from: contents)
+        var contents = contents
+        // 1. 时区信息
+        timezones = try timezones(from: &contents)
         // 2. 解析 VEVENT
-        events = try events(from: contents)
+        events = try events(from: &contents)
         // 3. todo
-        todos = try todos(from: contents)
+        todos = try todos(from: &contents)
         // 4. journal
-        journals = try journals(from: contents)
+        journals = try journals(from: &contents)
         // 5. freebusy
-        freebusys = try freebusys(from: contents)
+        freebusys = try freebusys(from: &contents)
+        // 6. 解析属性
+        attributes = try attributes(from: &contents)
+        
+        
     }
 }
 
@@ -84,36 +87,38 @@ extension CKCalendar {
     /// - Parameter contents: String
     /// - Throws: Error
     /// - Returns: [CKAttribute]
-    private func attributes(from contents: String) throws -> [CKAttribute] {
+    private func attributes(from contents: inout String) throws -> [CKAttribute] {
         var attrs: [CKAttribute] = []
         for key in AttributeKey.allCases {
             let reg = try NSRegularExpression.init(pattern: key.pattern, options: [.caseInsensitive])
             if key.mutable == true {
-                let results = reg.matches(in: contents, options: [], range: contents.hub.range)
+                let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
                 guard results.isEmpty == false else { continue }
                 for result in results {
                     let content = contents.hub.substring(with: result.range)
                     let attr = try CKAttribute.init(from: content)
                     attrs.append(attr)
+                    contents = contents.hub.remove(with: result.range)
                 }
             } else {
                 guard let result = reg.firstMatch(in: contents, options: [], range: contents.hub.range) else { continue }
                 let content = contents.hub.substring(with: result.range)
                 let attr = try CKAttribute.init(from: content)
                 attrs.append(attr)
+                contents = contents.hub.remove(with: result.range)
             }
         }
         // 获取自定义
         // X-PROP / IANA-PROP
         let pattern: String = #"(\r\n)(X-|IANA-)([\s\S]*?)(\r\n)"#
         let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range)
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
         for result in results {
             let content = contents.hub.substring(with: result.range)
             let attr = try CKAttribute.init(from: content)
             attrs.append(attr)
+            contents = contents.hub.remove(with: result.range)
         }
-        
         return attrs
     }
     
@@ -121,29 +126,35 @@ extension CKCalendar {
     /// - Parameter contents: String
     /// - Throws: Error
     /// - Returns: [CKEvent]
-    private func events(from contents: String) throws -> [CKEvent] {
+    private func events(from contents: inout String) throws -> [CKEvent] {
         let pattern: String = #"BEGIN:VEVENT([\s\S]*?)\END:VEVENT"#
         let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range)
-        let events = try results.map({ (result) -> CKEvent in
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var events: [CKEvent] = []
+        for result in results {
             let content = contents.hub.substring(with: result.range)
-            return try CKEvent.init(from: content)
-        })
+            let item = try CKEvent.init(from: content)
+            events.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
         return events
     }
     
     /// get todos from string
     /// - Parameter contents: String
     /// - Throws: Error
-    /// - Returns: [CKToDo]
-    private func todos(from contents: String) throws -> [CKToDo] {
+    /// - Returns: [CKTodo]
+    private func todos(from contents: inout String) throws -> [CKTodo] {
         let pattern: String = #"BEGIN:VTODO([\s\S]*?)\END:VTODO"#
         let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range)
-        let todos = try results.map({ (result) -> CKToDo in
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var todos: [CKTodo] = []
+        for result in results {
             let content = contents.hub.substring(with: result.range)
-            return try CKToDo.init(from: content)
-        })
+            let item = try CKTodo.init(from: content)
+            todos.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
         return todos
     }
     
@@ -151,14 +162,17 @@ extension CKCalendar {
     /// - Parameter contents: String
     /// - Throws: Error
     /// - Returns: [CKJournal]
-    private func journals(from contents: String) throws -> [CKJournal] {
+    private func journals(from contents: inout String) throws -> [CKJournal] {
         let pattern: String = #"BEGIN:VJOURNAL([\s\S]*?)\END:VJOURNAL"#
         let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range)
-        let journals = try results.map({ (result) -> CKJournal in
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var journals: [CKJournal] = []
+        for result in results {
             let content = contents.hub.substring(with: result.range)
-            return try CKJournal.init(from: content)
-        })
+            let item = try CKJournal.init(from: content)
+            journals.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
         return journals
     }
     
@@ -166,14 +180,17 @@ extension CKCalendar {
     /// - Parameter contents: String
     /// - Throws: Error
     /// - Returns: [CKJournal]
-    private func freebusys(from contents: String) throws -> [CKFreeBusy] {
+    private func freebusys(from contents: inout String) throws -> [CKFreeBusy] {
         let pattern: String = #"BEGIN:VFREEBUSY([\s\S]*?)\END:VFREEBUSY"#
         let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range)
-        let freebusys = try results.map({ (result) -> CKFreeBusy in
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var freebusys: [CKFreeBusy] = []
+        for result in results {
             let content = contents.hub.substring(with: result.range)
-            return try CKFreeBusy.init(from: content)
-        })
+            let item = try CKFreeBusy.init(from: content)
+            freebusys.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
         return freebusys
     }
     
@@ -181,14 +198,17 @@ extension CKCalendar {
     /// - Parameter contents: String
     /// - Throws: Error
     /// - Returns: [CKJournal]
-    private func timezones(from contents: String) throws -> [CKTimezone] {
+    private func timezones(from contents: inout String) throws -> [CKTimezone] {
         let pattern: String = #"BEGIN:VTIMEZONE([\s\S]*?)\END:VTIMEZONE"#
         let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range)
-        let timezones = try results.map({ (result) -> CKTimezone in
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var timezones: [CKTimezone] = []
+        for result in results {
             let content = contents.hub.substring(with: result.range)
-            return try CKTimezone.init(from: content)
-        })
+            let item = try CKTimezone.init(from: content)
+            timezones.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
         return timezones
     }
 }
