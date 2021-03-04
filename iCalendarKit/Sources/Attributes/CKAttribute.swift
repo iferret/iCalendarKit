@@ -104,6 +104,44 @@ public class CKAttribute {
         self.attrs = attrs
     }
     
+    /// get attrs from ics string
+    /// - Parameter contents: String
+    /// - Throws: String
+    /// - Returns: [CKAttribute]
+    internal static func attributes(from contents: inout String, withKeys keys: [CKRegularable]) throws -> [CKAttribute] {
+        var attrs: [CKAttribute] = []
+        for key in keys {
+            let reg = try NSRegularExpression.init(pattern: key.pattern, options: [.caseInsensitive])
+            if key.mutable == true {
+                let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+                guard results.isEmpty == false else { continue }
+                for result in results {
+                    let content = contents.hub.substring(with: result.range)
+                    let attr = try CKAttribute.init(from: content)
+                    attrs.append(attr)
+                    contents = contents.hub.remove(with: result.range)
+                }
+            } else {
+                guard let result = reg.firstMatch(in: contents, options: [], range: contents.hub.range) else { continue }
+                let content = contents.hub.substring(with: result.range)
+                let attr = try CKAttribute.init(from: content)
+                attrs.append(attr)
+                contents = contents.hub.remove(with: result.range)
+            }
+        }
+        // 获取自定义
+        // X-PROP / IANA-PROP
+        let pattern: String = #"(\r\n)(X-|IANA-)([\s\S]*?)(\r\n)"#
+        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        for result in results {
+            let content = contents.hub.substring(with: result.range)
+            let attr = try CKAttribute.init(from: content)
+            attrs.append(attr)
+            contents = contents.hub.remove(with: result.range)
+        }
+        return attrs
+    }
 }
 
 // MARK: - CKTextable

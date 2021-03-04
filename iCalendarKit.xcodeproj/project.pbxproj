@@ -11,6 +11,7 @@
 		C74A0EA025EF8B16007E3D25 /* String+Hub.swift in Sources */ = {isa = PBXBuildFile; fileRef = C74A0E9F25EF8B16007E3D25 /* String+Hub.swift */; };
 		C774EBFA25F077C4000DD25B /* NSLock+Hub.swift in Sources */ = {isa = PBXBuildFile; fileRef = C774EBF925F077C4000DD25B /* NSLock+Hub.swift */; };
 		C774EC1D25F0A46A000DD25B /* CKAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = C774EC1C25F0A46A000DD25B /* CKAttribute.swift */; };
+		C774EC2125F0C708000DD25B /* CKRegularable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C774EC2025F0C708000DD25B /* CKRegularable.swift */; };
 		C7B84A4325EF4FE60025ABCB /* CKTodo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B84A4225EF4FE60025ABCB /* CKTodo.swift */; };
 		C7B84A4725EF53320025ABCB /* CKJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B84A4625EF53320025ABCB /* CKJournal.swift */; };
 		C7B84A4A25EF55AF0025ABCB /* CKFreeBusy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B84A4925EF55AF0025ABCB /* CKFreeBusy.swift */; };
@@ -67,6 +68,7 @@
 		C74A0E9F25EF8B16007E3D25 /* String+Hub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Hub.swift"; sourceTree = "<group>"; };
 		C774EBF925F077C4000DD25B /* NSLock+Hub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLock+Hub.swift"; sourceTree = "<group>"; };
 		C774EC1C25F0A46A000DD25B /* CKAttribute.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CKAttribute.swift; sourceTree = "<group>"; };
+		C774EC2025F0C708000DD25B /* CKRegularable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKRegularable.swift; sourceTree = "<group>"; };
 		C7B84A4225EF4FE60025ABCB /* CKTodo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKTodo.swift; sourceTree = "<group>"; };
 		C7B84A4625EF53320025ABCB /* CKJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKJournal.swift; sourceTree = "<group>"; };
 		C7B84A4925EF55AF0025ABCB /* CKFreeBusy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKFreeBusy.swift; sourceTree = "<group>"; };
@@ -201,6 +203,7 @@
 			children = (
 				C7F1356925EF152C0076D9A7 /* CKError.swift */,
 				C7F1357C25EF31970076D9A7 /* CKTextable.swift */,
+				C774EC2025F0C708000DD25B /* CKRegularable.swift */,
 				C74A0E9C25EF8A65007E3D25 /* Compatible.swift */,
 				C74A0E9F25EF8B16007E3D25 /* String+Hub.swift */,
 				C774EBF925F077C4000DD25B /* NSLock+Hub.swift */,
@@ -336,6 +339,7 @@
 				C774EC1D25F0A46A000DD25B /* CKAttribute.swift in Sources */,
 				C7F1355B25EF13DD0076D9A7 /* CKEvent.swift in Sources */,
 				C7B84A5325EF5B300025ABCB /* CKDaylight.swift in Sources */,
+				C774EC2125F0C708000DD25B /* CKRegularable.swift in Sources */,
 				C7F1356A25EF152C0076D9A7 /* CKError.swift in Sources */,
 				C74A0EA025EF8B16007E3D25 /* String+Hub.swift in Sources */,
 				C7B84A5725EF631B0025ABCB /* CKAttendee.swift in Sources */,

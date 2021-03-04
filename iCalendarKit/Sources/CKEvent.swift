@@ -38,7 +38,7 @@ extension CKEvent {
     }
 }
 
-extension CKEvent.AttributeKey {
+extension CKEvent.AttributeKey: CKRegularable {
     
     /// mutable
     internal var mutable: Bool {
@@ -81,7 +81,7 @@ public class CKEvent {
         // 1. get alarms from string of contents
         alarms = try CKAlarm.alarms(from: &contents)
         // 2. get attributes from string of contents
-        attributes = try attributes(from: &contents)
+        attributes = try CKAttribute.attributes(from: &contents, withKeys: AttributeKey.allCases)
     }
     
     /// get events for contents string
@@ -101,50 +101,6 @@ public class CKEvent {
         }
         return events
     }
-}
-
-// MARK: - 解析属性
-extension CKEvent {
-    
-    /// get attributes from string of contents
-    /// - Parameter contents: String
-    /// - Throws: Error
-    /// - Returns: [CKAttribute]
-    private func attributes(from contents: inout String) throws -> [CKAttribute] {
-        var attrs: [CKAttribute] = []
-        for key in AttributeKey.allCases {
-            let reg = try NSRegularExpression.init(pattern: key.pattern, options: [.caseInsensitive])
-            if key.mutable == true {
-                let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
-                guard results.isEmpty == false else { continue }
-                for result in results {
-                    let content = contents.hub.substring(with: result.range)
-                    let attr = try CKAttribute.init(from: content)
-                    attrs.append(attr)
-                    contents = contents.hub.remove(with: result.range)
-                }
-            } else {
-                guard let result = reg.firstMatch(in: contents, options: [], range: contents.hub.range) else { continue }
-                let content = contents.hub.substring(with: result.range)
-                let attr = try CKAttribute.init(from: content)
-                attrs.append(attr)
-                contents = contents.hub.remove(with: result.range)
-            }
-        }
-        // 获取自定义
-        // X-PROP / IANA-PROP
-        let pattern: String = #"(\r\n)(X-|IANA-)([\s\S]*?)(\r\n)"#
-        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
-        for result in results {
-            let content = contents.hub.substring(with: result.range)
-            let attr = try CKAttribute.init(from: content)
-            attrs.append(attr)
-            contents = contents.hub.remove(with: result.range)
-        }
-        return attrs
-    }
-    
 }
 
 extension CKEvent {
