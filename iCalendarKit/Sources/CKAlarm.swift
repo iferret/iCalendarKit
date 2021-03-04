@@ -69,8 +69,28 @@ public class CKAlarm {
         // 1. get attrs
         attributes = try attributes(from: &contents)
     }
+    
+    
+    /// get alarms from string of contents
+    /// - Parameter contents: String
+    /// - Throws: Error
+    /// - Returns: [CKAlarm]
+    public static func alarms(from contents: inout String) throws -> [CKAlarm] {
+        let pattern: String = #"BEGIN:VALARM([\s\S]*?)END:VALARM"#
+        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var alarms: [CKAlarm] = []
+        for result in results {
+            let content = contents.hub.substring(with: result.range)
+            let item = try CKAlarm.init(from: content)
+            alarms.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
+        return alarms
+    }
 }
 
+// MARK: - 解析属性
 extension CKAlarm {
     
     /// get attrs from ics string
@@ -114,6 +134,7 @@ extension CKAlarm {
     }
 }
 
+// MARK: - 更新/获取属性
 extension CKAlarm {
     
     /// attrs for key
@@ -309,18 +330,22 @@ extension CKAlarm {
     /// remove all attrs for key
     /// - Parameter key: AttributeKey
     public func removeAll(for key: AttributeKey) {
-        attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        }
     }
     
     /// remove all attrs for key
     /// - Parameter key: String
     public func removeAll(for name: String) {
-        attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        }
     }
     
 }
 
-
+// MARK: - CKTextable
 extension CKAlarm: CKTextable {
     
     /// ics format string

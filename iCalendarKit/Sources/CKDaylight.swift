@@ -68,9 +68,26 @@ public class CKDaylight {
         attributes = try attributes(from: &contents)
     }
     
-    
+    /// get daylights from ics string
+    /// - Parameter contents: String
+    /// - Throws: String
+    /// - Returns: [CKAttribute]
+    public static func daylights(from contents: inout String) throws -> [CKDaylight] {
+        let pattern: String = #"BEGIN:STANDARD([\s\S]*?)\END:STANDARD"#
+        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var daylights: [CKDaylight] = []
+        for result in results {
+            let content = contents.hub.substring(with: result.range)
+            let item = try CKDaylight.init(from: content)
+            daylights.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
+        return daylights
+    }
 }
 
+// MARK: - 解析属性
 extension CKDaylight {
     
     /// get attrs from ics string
@@ -113,7 +130,7 @@ extension CKDaylight {
     }
 }
 
-
+// MARK: - 属性相关
 extension CKDaylight {
     
     /// attrs for key
@@ -309,13 +326,17 @@ extension CKDaylight {
     /// remove all attrs for key
     /// - Parameter key: AttributeKey
     public func removeAll(for key: AttributeKey) {
-        attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        }
     }
     
     /// remove all attrs for key
     /// - Parameter key: String
     public func removeAll(for name: String) {
-        attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        }
     }
 }
 

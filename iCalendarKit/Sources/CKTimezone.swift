@@ -62,16 +62,33 @@ public class CKTimezone {
     public init(from contents: String) throws {
         var contents = contents
         // 1. get standards
-        standards = try standards(from: &contents)
+        standards = try CKStandard.standards(from: &contents)
         // 2. get daylight
-        daylights = try daylights(from: &contents)
+        daylights = try CKDaylight.daylights(from: &contents)
         // 3. get attrs
         attributes = try attributes(from: &contents)
     }
     
-    
+    /// get timezones from string
+    /// - Parameter contents: String
+    /// - Throws: Error
+    /// - Returns: [CKJournal]
+    public static func timezones(from contents: inout String) throws -> [CKTimezone] {
+        let pattern: String = #"BEGIN:VTIMEZONE([\s\S]*?)\END:VTIMEZONE"#
+        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var timezones: [CKTimezone] = []
+        for result in results {
+            let content = contents.hub.substring(with: result.range)
+            let item = try CKTimezone.init(from: content)
+            timezones.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
+        return timezones
+    }
 }
 
+// MARK: - 解析属性
 extension CKTimezone {
     
     /// get attrs from ics string
@@ -112,44 +129,9 @@ extension CKTimezone {
         }
         return attrs
     }
-    
-    /// get standards from ics string
-    /// - Parameter contents: String
-    /// - Throws: String
-    /// - Returns: [CKAttribute]
-    private func standards(from contents: inout String) throws -> [CKStandard] {
-        let pattern: String = #"BEGIN:STANDARD([\s\S]*?)\END:STANDARD"#
-        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
-        var standards: [CKStandard] = []
-        for result in results {
-            let content = contents.hub.substring(with: result.range)
-            let item = try CKStandard.init(from: content)
-            standards.append(item)
-            contents = contents.hub.remove(with: result.range)
-        }
-        return standards
-    }
-    
-    /// get daylights from ics string
-    /// - Parameter contents: String
-    /// - Throws: String
-    /// - Returns: [CKAttribute]
-    private func daylights(from contents: inout String) throws -> [CKDaylight] {
-        let pattern: String = #"BEGIN:STANDARD([\s\S]*?)\END:STANDARD"#
-        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
-        var daylights: [CKDaylight] = []
-        for result in results {
-            let content = contents.hub.substring(with: result.range)
-            let item = try CKDaylight.init(from: content)
-            daylights.append(item)
-            contents = contents.hub.remove(with: result.range)
-        }
-        return daylights
-    }
 }
 
+// MARK: - 属性相关
 extension CKTimezone {
     /// attrs for key
     /// - Parameter key: AttributeKey
@@ -344,16 +326,21 @@ extension CKTimezone {
     /// remove all attrs for key
     /// - Parameter key: AttributeKey
     public func removeAll(for key: AttributeKey) {
-        attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        }
     }
     
     /// remove all attrs for key
     /// - Parameter key: String
     public func removeAll(for name: String) {
-        attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        }
     }
 }
 
+// MARK: - CKTextable
 extension CKTimezone: CKTextable {
     
     /// ics format string

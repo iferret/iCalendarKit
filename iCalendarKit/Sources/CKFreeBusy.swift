@@ -68,8 +68,26 @@ public class CKFreeBusy {
         attributes = try attributes(from: &contents)
     }
     
+    /// get freebusys from string
+    /// - Parameter contents: String
+    /// - Throws: Error
+    /// - Returns: [CKJournal]
+    public static func freebusys(from contents: inout String) throws -> [CKFreeBusy] {
+        let pattern: String = #"BEGIN:VFREEBUSY([\s\S]*?)\END:VFREEBUSY"#
+        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var freebusys: [CKFreeBusy] = []
+        for result in results {
+            let content = contents.hub.substring(with: result.range)
+            let item = try CKFreeBusy.init(from: content)
+            freebusys.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
+        return freebusys
+    }
 }
 
+// MARK: - 解析属性
 extension CKFreeBusy {
     
     /// get attrs from ics string
@@ -112,6 +130,7 @@ extension CKFreeBusy {
     }
 }
 
+// MARK: - 属性相关
 extension CKFreeBusy {
     /// attrs for key
     /// - Parameter key: AttributeKey
@@ -306,16 +325,21 @@ extension CKFreeBusy {
     /// remove all attrs for key
     /// - Parameter key: AttributeKey
     public func removeAll(for key: AttributeKey) {
-        attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        }
     }
     
     /// remove all attrs for key
     /// - Parameter key: String
     public func removeAll(for name: String) {
-        attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        }
     }
 }
 
+// MARK: - CKTextable
 extension CKFreeBusy: CKTextable {
     
     /// ics format string

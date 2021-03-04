@@ -15,6 +15,8 @@ public class CKSerialization {
     
     /// content of ics file
     public let contents: String
+    /// [CKCalendar]
+    public var calendars: [CKCalendar] = []
     
     // MARK: - 生命周期
     
@@ -37,25 +39,13 @@ public class CKSerialization {
             value = value.replacingOccurrences(of: "\r\n\r\n", with: "\r\n")
         }
         value = value.replacingOccurrences(of: "\r\n", with: "\r\n\r\n")
-        // set contents
+        // update calendars
         self.contents = value
+        self.calendars = try CKCalendar.calendars(from: &value)
     }
 }
 
 extension CKSerialization {
     
-    /// get CKCalendar Array
-    /// - Throws: Error
-    /// - Returns: [CKCalendar]
-    public func calendars() throws -> [CKCalendar] {
-        let pattern: String = #"BEGIN:VCALENDAR([\s\S]*?)END:VCALENDAR"#
-        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range)
-        // create CKCalendar
-        let calendars = try results.map { (result) -> CKCalendar in
-            let content = self.contents.hub.substring(with: result.range)
-            return try CKCalendar.init(with: content)
-        }
-        return calendars
-    }
+
 }

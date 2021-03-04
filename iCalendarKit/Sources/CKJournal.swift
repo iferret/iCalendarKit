@@ -72,9 +72,26 @@ public class CKJournal {
         attributes = try attributes(from: &contents)
     }
     
-    
+    /// get journals from string
+    /// - Parameter contents: String
+    /// - Throws: Error
+    /// - Returns: [CKJournal]
+    public static func journals(from contents: inout String) throws -> [CKJournal] {
+        let pattern: String = #"BEGIN:VJOURNAL([\s\S]*?)\END:VJOURNAL"#
+        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var journals: [CKJournal] = []
+        for result in results {
+            let content = contents.hub.substring(with: result.range)
+            let item = try CKJournal.init(from: content)
+            journals.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
+        return journals
+    }
 }
 
+// MARK: - 解析属性
 extension CKJournal {
     
     /// get attrs from ics string
@@ -117,6 +134,7 @@ extension CKJournal {
     }
 }
 
+// MARK: - 属性相关
 extension CKJournal {
     /// attrs for key
     /// - Parameter key: AttributeKey
@@ -311,16 +329,21 @@ extension CKJournal {
     /// remove all attrs for key
     /// - Parameter key: AttributeKey
     public func removeAll(for key: AttributeKey) {
-        attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        }
     }
     
     /// remove all attrs for key
     /// - Parameter key: String
     public func removeAll(for name: String) {
-        attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        }
     }
 }
 
+// MARK: - CKTextable
 extension CKJournal: CKTextable {
     
     /// ics format string

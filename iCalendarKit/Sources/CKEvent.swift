@@ -79,12 +79,31 @@ public class CKEvent {
     public init(from contents: String) throws {
         var contents = contents
         // 1. get alarms from string of contents
-        alarms = try alarms(from: &contents)
+        alarms = try CKAlarm.alarms(from: &contents)
         // 2. get attributes from string of contents
         attributes = try attributes(from: &contents)
     }
+    
+    /// get events for contents string
+    /// - Parameter contents: String
+    /// - Throws: Error
+    /// - Returns: [CKEvent]
+    public static func events(from contents: inout String) throws -> [CKEvent] {
+        let pattern: String = #"BEGIN:VEVENT([\s\S]*?)\END:VEVENT"#
+        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        var events: [CKEvent] = []
+        for result in results {
+            let content = contents.hub.substring(with: result.range)
+            let item = try CKEvent.init(from: content)
+            events.append(item)
+            contents = contents.hub.remove(with: result.range)
+        }
+        return events
+    }
 }
 
+// MARK: - 解析属性
 extension CKEvent {
     
     /// get attributes from string of contents
@@ -126,25 +145,9 @@ extension CKEvent {
         return attrs
     }
     
-    /// get alarms from string of contents
-    /// - Parameter contents: String
-    /// - Throws: Error
-    /// - Returns: [CKAlarm]
-    private func alarms(from contents: inout String) throws -> [CKAlarm] {
-        let pattern: String = #"BEGIN:VALARM([\s\S]*?)END:VALARM"#
-        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
-        let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
-        var alarms: [CKAlarm] = []
-        for result in results {
-            let content = contents.hub.substring(with: result.range)
-            let item = try CKAlarm.init(from: content)
-            alarms.append(item)
-            contents = contents.hub.remove(with: result.range)
-        }
-        return alarms
-    }
 }
 
+// MARK: - 属性相关
 extension CKEvent {
     /// attrs for key
     /// - Parameter key: AttributeKey
@@ -339,13 +342,17 @@ extension CKEvent {
     /// remove all attrs for key
     /// - Parameter key: AttributeKey
     public func removeAll(for key: AttributeKey) {
-        attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+        }
     }
     
     /// remove all attrs for key
     /// - Parameter key: String
     public func removeAll(for name: String) {
-        attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        lock.hub.safe {
+            attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+        }
     }
 }
 

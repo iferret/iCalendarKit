@@ -17,5 +17,7 @@ BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:REMINDER
 END:VALARM
+ATTACH:CID:jsmith.part3.960817T083000.xyzMail@example.com
+ATTACH;FMTTYPE=application/postscript:ftp://example.com/pub/reports/r-960812.ps
 END:VEVENT
 END:VCALENDAR

@@ -33,15 +33,16 @@ class ViewController: UIViewController {
          ATTENDEE;ROLE=NON-PARTICIPANT;PARTSTAT=DELEGATED;DELEGATED-TO="mailto:hcabot@example.com";CN=The Big Cheese:mailto:iamboss@example.com
          
          
-         
+         8.3.1.  Components Registry
          */
         
-        guard let url = Bundle.main.url(forResource: "ATT00002", withExtension: "ics") else { return }
+        guard let url = Bundle.main.url(forResource: "ATT00003", withExtension: "ics") else { return }
         do {
             let serialization = try CKSerialization.init(with: url)
-            let calendars = try serialization.calendars()
+            let calendars = try serialization.calendars
             calendars.forEach { (cal) in
                 print(cal.text)
+                
             }
         } catch {
             print(error)
