@@ -38,12 +38,13 @@ class ViewController: UIViewController {
         
         guard let url = Bundle.main.url(forResource: "ATT00003", withExtension: "ics") else { return }
         do {
-            let serialization = try CKSerialization.init(with: url)
-            let calendars = try serialization.calendars
+            let calendars = try CKSerialization.calendars(with: url)
             calendars.forEach { (cal) in
                 print(cal.text)
-                
             }
+            
+            let data = try CKSerialization.data(with: calendars)
+            print(data)
         } catch {
             print(error)
         }

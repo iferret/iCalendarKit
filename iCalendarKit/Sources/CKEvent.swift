@@ -147,6 +147,53 @@ extension CKEvent {
     
 }
 
+extension CKEvent {
+    
+    /// add alarm
+    /// - Parameter alarms: [CKAlarm]
+    @discardableResult
+    public func add(alarms: [CKAlarm]) -> Self {
+        return lock.hub.safe {
+            self.alarms.append(contentsOf: alarms)
+            return self
+        }
+    }
+    
+    /// add alarm
+    /// - Parameter alarm: CKAlarm
+    @discardableResult
+    public func add(alarm: CKAlarm) -> Self {
+        return add(alarms: [alarm])
+    }
+    
+    /// set alarms
+    /// - Parameter alarms: [CKAlarm]
+    @discardableResult
+    public func set(alarms: [CKAlarm]) -> Self {
+        return lock.hub.safe {
+            self.alarms = alarms
+            return self
+        }
+    }
+    
+    /// set alarm
+    /// - Parameter alarm: CKAlarm
+    @discardableResult
+    public func set(alarm: CKAlarm) -> Self {
+        return set(alarms: [alarm])
+    }
+    
+    /// remove all alarms
+    /// - Returns: description
+    @discardableResult
+    public func removeAlarms() -> Self {
+        return lock.hub.safe {
+            self.alarms.removeAll()
+            return self
+        }
+    }
+}
+
 // MARK: - 属性相关
 extension CKEvent {
     /// attrs for key
@@ -189,30 +236,31 @@ extension CKEvent {
     /// - Parameters:
     ///   - attrs: [CKAttribute]
     ///   - key: AttributeKey
-    public func set(_ attrs: [CKAttribute], for key: AttributeKey) {
+    @discardableResult
+    public func set(_ attrs: [CKAttribute], for key: AttributeKey) -> Self {
         // update name
         attrs.forEach {
             guard $0.name.isEmpty == true else { return }
             $0.name = key.rawValue.uppercased()
         }
-        
-        lock.hub.safe {
+        return lock.hub.safe {
             if let index = attributes.firstIndex(where: { $0.name.uppercased() == key.rawValue.uppercased() }) {
                 if key.mutable == true {
                     attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
                     attributes.insert(contentsOf: attrs, at: index)
                 } else {
-                    guard let attr = attrs.first else { return }
+                    guard let attr = attrs.first else { return self }
                     attributes[index] = attr
                 }
             } else {
                 if key.mutable == true {
                     attributes.append(contentsOf: attrs)
                 } else {
-                    guard let attr = attrs.first else { return }
+                    guard let attr = attrs.first else { return self }
                     attributes.append(attr)
                 }
             }
+            return self
         }
     }
     
@@ -220,38 +268,40 @@ extension CKEvent {
     /// - Parameters:
     ///   - attr: CKAttribute
     ///   - key: AttributeKey
-    public func set(_ attr: CKAttribute, for key: AttributeKey) {
-        set([attr], for: key)
+    @discardableResult
+    public func set(_ attr: CKAttribute, for key: AttributeKey) -> Self {
+        return set([attr], for: key)
     }
     
     /// set attrs
     /// - Parameters:
     ///   - attrs: [CKAttribute]
     ///   - name: string
-    public func set(_ attrs: [CKAttribute], for name: String) {
+    @discardableResult
+    public func set(_ attrs: [CKAttribute], for name: String) -> Self {
         // update name
         attrs.forEach {
             guard $0.name.isEmpty == true else { return }
             $0.name = name.uppercased()
         }
-        
-        lock.hub.safe {
+        return lock.hub.safe {
             if let index = attributes.firstIndex(where: { $0.name.uppercased() == name.uppercased() }) {
                 if AttributeKey.init(rawValue: name)?.mutable == true || name.uppercased().hub.hasPrefix(["X-", "IANA-"]) == true {
                     attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
                     attributes.insert(contentsOf: attrs, at: index)
                 } else {
-                    guard let attr = attrs.first else { return }
+                    guard let attr = attrs.first else { return self }
                     attributes[index] = attr
                 }
             } else {
                 if AttributeKey.init(rawValue: name)?.mutable == true || name.uppercased().hub.hasPrefix(["X-", "IANA-"]) == true {
                     attributes.append(contentsOf: attrs)
                 } else {
-                    guard let attr = attrs.first else { return }
+                    guard let attr = attrs.first else { return self }
                     attributes.append(attr)
                 }
             }
+            return self
         }
     }
     
@@ -259,37 +309,39 @@ extension CKEvent {
     /// - Parameters:
     ///   - attr: CKAttribute
     ///   - name: String
-    public func set(_ attr: CKAttribute, for name: String) {
-        set([attr], for: name)
+    @discardableResult
+    public func set(_ attr: CKAttribute, for name: String) -> Self {
+        return set([attr], for: name)
     }
     
     /// add attrs
     /// - Parameters:
     ///   - attrs: [CKAttribute]
     ///   - key: AttributeKey
-    public func add(_ attrs: [CKAttribute], for key: AttributeKey) {
+    @discardableResult
+    public func add(_ attrs: [CKAttribute], for key: AttributeKey) -> Self {
         // update name
         attrs.forEach {
             guard $0.name.isEmpty == true else { return }
             $0.name = key.rawValue.uppercased()
         }
-        
-        lock.hub.safe {
+        return lock.hub.safe {
             if let index = attributes.lastIndex(where: { $0.name.uppercased() == key.rawValue.uppercased() }) {
                 if key.mutable == true {
                     attributes.insert(contentsOf: attrs, at: index + 1)
                 } else {
-                    guard let attr = attrs.first else { return }
+                    guard let attr = attrs.first else { return self }
                     attributes[index] = attr
                 }
             } else {
                 if key.mutable == true {
                     attributes.append(contentsOf: attrs)
                 } else {
-                    guard let attr = attrs.first else { return }
+                    guard let attr = attrs.first else { return self }
                     attributes.append(attr)
                 }
             }
+            return self
         }
     }
     
@@ -297,37 +349,39 @@ extension CKEvent {
     /// - Parameters:
     ///   - attr: CKAttribute
     ///   - key: AttributeKey
-    public func add(_ attr: CKAttribute, for key: AttributeKey) {
-        add([attr], for: key)
+    @discardableResult
+    public func add(_ attr: CKAttribute, for key: AttributeKey) -> Self {
+        return add([attr], for: key)
     }
     
     /// add attrs
     /// - Parameters:
     ///   - attrs: [CKAttribute]
     ///   - name: String
-    public func add(_ attrs: [CKAttribute], for name: String) {
+    @discardableResult
+    public func add(_ attrs: [CKAttribute], for name: String) -> Self {
         // update name
         attrs.forEach {
             guard $0.name.isEmpty == true else { return }
             $0.name = name.uppercased()
         }
-        
-        lock.hub.safe {
+        return lock.hub.safe {
             if let index = attributes.lastIndex(where: { $0.name.uppercased() == name.uppercased() }) {
                 if AttributeKey.init(rawValue: name)?.mutable == true || name.uppercased().hub.hasPrefix(["X-", "IANA-"]) == true {
                     attributes.insert(contentsOf: attrs, at: index + 1)
                 } else {
-                    guard let attr = attrs.first else { return }
+                    guard let attr = attrs.first else { return self }
                     attributes[index] = attr
                 }
             } else {
                 if AttributeKey.init(rawValue: name)?.mutable == true || name.uppercased().hub.hasPrefix(["X-", "IANA-"]) == true {
                     attributes.append(contentsOf: attrs)
                 } else {
-                    guard let attr = attrs.first else { return }
+                    guard let attr = attrs.first else { return self }
                     attributes.append(attr)
                 }
             }
+            return self
         }
     }
     
@@ -335,23 +389,27 @@ extension CKEvent {
     /// - Parameters:
     ///   - attr: CKAttribute
     ///   - name: String
-    public func add(_ attr: CKAttribute, for name: String) {
-        add([attr], for: name)
+    @discardableResult
+    public func add(_ attr: CKAttribute, for name: String) -> Self {
+        return add([attr], for: name)
     }
     
     /// remove all attrs for key
-    /// - Parameter key: AttributeKey
-    public func removeAll(for key: AttributeKey) {
-        lock.hub.safe {
+    @discardableResult
+    public func removeAll(for key: AttributeKey) -> Self {
+        return lock.hub.safe {
             attributes.removeAll(where: { $0.name.uppercased() == key.rawValue.uppercased() })
+            return self
         }
     }
     
     /// remove all attrs for key
     /// - Parameter key: String
-    public func removeAll(for name: String) {
-        lock.hub.safe {
+    @discardableResult
+    public func removeAll(for name: String) -> Self {
+        return lock.hub.safe {
             attributes.removeAll(where: { $0.name.uppercased() == name.uppercased() })
+            return self
         }
     }
 }
