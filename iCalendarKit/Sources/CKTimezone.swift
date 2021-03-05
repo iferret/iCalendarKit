@@ -12,22 +12,34 @@ extension CKTimezone {
     /// AttributeKey
     public enum AttributeKey: String, CaseIterable {
         /**
-         'tzid' is REQUIRED, but MUST NOT occur more than once.
+         'tzid' is REQUIRED, but MUST NOT occur more than once. DTSTART / TZOFFSETTO / TZOFFSETFROM /
          */
-        case TZID
+        case TZID, DTSTART, TZOFFSETTO, TZOFFSETFROM
         /**
          'last-mod' and 'tzurl' are OPTIONAL, but MUST NOT occur more than once.
-         LAST-MOD / TZURL /
+         LAST-MOD / TZURL
          */
-        case LASTMOD = "LAST-MOD", TZURL
+        case LASTMOD = "LAST-MODIFIED", TZURL, RRULE
+        /**
+         The following are OPTIONAL, and MAY occur more than once.
+         COMMENT / RDATE / TZNAME / X-PROP / IANA-PROP
+         */
+        case COMMENT, RDATE, TZNAME
     }
     
 }
 
 extension CKTimezone.AttributeKey: CKRegularable {
+    /// String
+    internal var name: String {
+        return rawValue
+    }
     /// mutable
     internal var mutable: Bool {
-        return false
+        switch self {
+        case .COMMENT,.RDATE, .TZNAME: return true
+        default: return false
+        }
     }
     
     /// pattern
@@ -103,9 +115,7 @@ extension CKTimezone {
     /// - Parameter key: AttributeKey
     /// - Returns: CKAttribute?
     public func attribute(for key: AttributeKey) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: key).first
-        }
+        return attributes(for: key).first
     }
     
     /// attributes for name
@@ -121,9 +131,7 @@ extension CKTimezone {
     /// - Parameter name: String
     /// - Returns: [CKAttribute]
     public func attribute(for name: String) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: name).first
-        }
+        return attributes(for: name).first
     }
     
     /// set attrs

@@ -23,14 +23,20 @@ public class CKAttribute {
     
     // MARK: - 私有属性
     
+    /// NSLock
+    private lazy var lock: NSLock = .init()
+    
     // MARK: - 生命周期
     
     
     /// 构建
     /// - Parameter contents: String
     /// - Throws: Error
-    public init(from contents: String) throws {
-        if contents.contains(";") == true {
+    public init(from contents: String, name: String) throws {
+        self.name = name
+        let pattern = #"^((\r\n)\#(name);)"#
+        let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+        if reg.firstMatch(in: contents, options: [], range: contents.hub.range) != nil {
             var contents = contents
             // 1. get name
             do {
@@ -39,8 +45,6 @@ public class CKAttribute {
                 guard let result = reg.firstMatch(in: contents, options: [], range: contents.hub.range) else {
                     throw CKError.custom("Can not get attribute name from string")
                 }
-                // set name
-                self.name = contents.hub.substring(with: result.range)
                 // update contents
                 contents = contents.hub.substring(from: result.range.location + result.range.length + 1)
             }
@@ -50,7 +54,7 @@ public class CKAttribute {
             for component in components where component.hasSuffix("\r\n") == false {
                 let components = component.components(separatedBy: "=")
                 guard components.count >= 2 else {
-                    throw CKError.custom("Can not get attribute attr from string")
+                    throw CKError.custom("Can not get attribute attrs from string")
                 }
                 attrs[components[0]] = components[1]
             }
@@ -117,14 +121,14 @@ public class CKAttribute {
                 guard results.isEmpty == false else { continue }
                 for result in results {
                     let content = contents.hub.substring(with: result.range)
-                    let attr = try CKAttribute.init(from: content)
+                    let attr = try CKAttribute.init(from: content, name: key.name)
                     attrs.append(attr)
                     contents = contents.hub.remove(with: result.range)
                 }
             } else {
                 guard let result = reg.firstMatch(in: contents, options: [], range: contents.hub.range) else { continue }
                 let content = contents.hub.substring(with: result.range)
-                let attr = try CKAttribute.init(from: content)
+                let attr = try CKAttribute.init(from: content, name: key.name)
                 attrs.append(attr)
                 contents = contents.hub.remove(with: result.range)
             }
@@ -134,13 +138,68 @@ public class CKAttribute {
         let pattern: String = #"(\r\n)(X-|IANA-)([\s\S]*?)(\r\n)"#
         let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
         let results = reg.matches(in: contents, options: [], range: contents.hub.range).sorted(by: { $0.range.location > $1.range.location })
+        guard results.isEmpty == false else { return attrs }
         for result in results {
             let content = contents.hub.substring(with: result.range)
-            let attr = try CKAttribute.init(from: content)
+            print("content", content)
+            let pattern: String = #"(?<=\r\n)(X-|IANA-)([\s\S]*?)((?=:)|(?=;))"#
+            let reg = try NSRegularExpression.init(pattern: pattern, options: [.caseInsensitive])
+            guard let res = reg.firstMatch(in: content, options: [], range: content.hub.range) else {
+                print(content)
+                throw CKError.custom("Can not get attribiute name")
+            }
+            let name = content.hub.substring(with: res.range)
+            let attr = try CKAttribute.init(from: content, name: name)
             attrs.append(attr)
             contents = contents.hub.remove(with: result.range)
         }
         return attrs
+    }
+}
+
+// MARK: - 属性相关
+extension CKAttribute {
+    
+    /// contains
+    /// - Parameter attrKey: String
+    /// - Returns: Bool
+    public func contains(_ attrKey: String) -> Bool {
+        return lock.hub.safe {
+            return attrs.keys.contains(where: { $0.uppercased() == attrKey.uppercased() })
+        }
+    }
+    
+    /// value for key
+    /// - Parameter attrKey: String
+    /// - Returns: String
+    public func value(for attrKey: String) -> String? {
+        return lock.hub.safe {
+            return attrs.first(where: { $0.key.uppercased() == attrKey.uppercased() })?.value
+        }
+    }
+    
+    /// set value for key
+    /// - Parameters:
+    ///   - value: String
+    ///   - attrKey: String
+    /// - Returns: Self
+    @discardableResult
+    public func set(value: String, for attrKey: String) -> Self {
+        return lock.hub.safe {
+            attrs[attrKey] = value
+            return self
+        }
+    }
+    
+    ///  remove value for key
+    /// - Parameter attrKey: String
+    /// - Returns: Self
+    @discardableResult
+    public func removeValue(for attrKey: String) -> Self {
+        return lock.hub.safe {
+            attrs.removeValue(forKey: attrKey)
+            return self
+        }
     }
 }
 

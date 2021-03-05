@@ -7,6 +7,7 @@
 
 import UIKit
 import iCalendarKit
+import EventKit
 
 class ViewController: UIViewController {
 
@@ -37,10 +38,22 @@ class ViewController: UIViewController {
          */
         
         guard let url = Bundle.main.url(forResource: "ATT00003", withExtension: "ics") else { return }
+        
+        
         do {
             let calendars = try CKSerialization.calendars(with: url)
-            calendars.forEach { (cal) in
+            let store = EKEventStore.init()
+            store.requestAccess(to: .event) { (_, _) in
+                
+            }
+            try calendars.forEach { (cal) in
                 print(cal.text)
+                let evts = try cal.events(with: store)
+                for evt in evts {
+                    try store.save(evt, span: .thisEvent)
+                    print(evt)
+                }
+                
             }
             
             let data = try CKSerialization.data(with: calendars)

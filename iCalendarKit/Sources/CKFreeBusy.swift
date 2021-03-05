@@ -28,6 +28,10 @@ extension CKFreeBusy {
 }
 
 extension CKFreeBusy.AttributeKey: CKRegularable {
+    /// String
+    internal var name: String {
+        return rawValue
+    }
     /// mutable
     internal var mutable: Bool {
         switch self {
@@ -102,9 +106,7 @@ extension CKFreeBusy {
     /// - Parameter key: AttributeKey
     /// - Returns: CKAttribute?
     public func attribute(for key: AttributeKey) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: key).first
-        }
+        return attributes(for: key).first
     }
     
     /// attributes for name
@@ -120,9 +122,7 @@ extension CKFreeBusy {
     /// - Parameter name: String
     /// - Returns: [CKAttribute]
     public func attribute(for name: String) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: name).first
-        }
+        return attributes(for: name).first
     }
     
     /// set attrs

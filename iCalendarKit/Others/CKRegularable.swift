@@ -10,4 +10,5 @@ import Foundation
  protocol CKRegularable {
     var mutable: Bool { get }
     var pattern: String { get }
+    var name: String { get }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CommonCrypto
 
 extension String: CompatibleValue {}
 extension CompatibleWrapper where Base == String {
@@ -13,6 +14,38 @@ extension CompatibleWrapper where Base == String {
     /// NSRange
     internal var range: NSRange {
         return .init(base.startIndex..., in: base)
+    }
+    /// Double
+    internal var doubleValue: Double {
+        return (base as NSString).doubleValue
+    }
+    /// Float
+    internal var floatValue: Float {
+        return (base as NSString).floatValue
+    }
+    /// Int32
+    internal var intValue: Int32 {
+        return (base as NSString).intValue
+    }
+    /// Int
+    internal var integerValue: Int {
+        return (base as NSString).integerValue
+    }
+    /// Int64
+    internal var longLongValue: Int64 {
+        return (base as NSString).longLongValue
+    }
+    /// Bool
+    internal var boolValue: Bool {
+        return (base as NSString).boolValue
+    }
+    
+    /// md5
+    internal var md5:String {
+        let utf8 = base.cString(using: .utf8)
+        var digest = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
+        CC_MD5(utf8, CC_LONG(utf8!.count - 1), &digest)
+        return digest.reduce("") { $0 + String(format:"%02X", $1) }
     }
     
 }
@@ -64,12 +97,25 @@ extension CompatibleWrapper where Base == String {
     /// - Returns: Bool
     internal func hasSuffix(_ suffixs: [String]) -> Bool {
         for suffix in suffixs {
-            guard base.hasPrefix(suffix) == true else { continue }
+            guard base.hasSuffix(suffix) == true else { continue }
             return true
         }
         return false
     }
 }
 
-
-
+extension CompatibleWrapper where Base == String {
+    
+    /// convert to timezone
+    /// - Returns: TimeZone
+    internal func toTimeZone() -> TimeZone {
+        if let tz = TimeZone.init(identifier: base) {
+            return tz
+        } else if base.localizedCaseInsensitiveContains("China Standard Time") == true {
+            guard let tz = TimeZone.init(identifier: "Asia/Shanghai") else { return .current }
+            return tz
+        } else {
+            return .current
+        }
+    }
+}

@@ -18,7 +18,7 @@ extension CKTodo {
         /**
          The following are OPTIONAL, but MUST NOT occur more than once.
          */
-        case CLASS, COMPLETED, CREATED, DESCRIPTION,DTSTART, GEO, LASTMOD = "LAST-MOD", LOCATION, ORGANIZER, PERCENT, PRIORITY, RECURID, SEQ, STATUS, SUMMARY, URL
+        case CLASS, COMPLETED, CREATED, DESCRIPTION,DTSTART, GEO, LASTMOD = "LAST-MODIFIED", LOCATION, ORGANIZER, PERCENT, PRIORITY, RECURID, SEQ, STATUS, SUMMARY, URL
         /**
          The following is OPTIONAL, but SHOULD NOT occur more than once.
          */
@@ -36,6 +36,10 @@ extension CKTodo {
 }
 
 extension CKTodo.AttributeKey: CKRegularable {
+    /// String
+    internal var name: String {
+        return rawValue
+    }
     /// mutable
     internal var mutable: Bool {
         switch self {
@@ -160,9 +164,7 @@ extension CKTodo {
     /// - Parameter key: AttributeKey
     /// - Returns: CKAttribute?
     public func attribute(for key: AttributeKey) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: key).first
-        }
+        return attributes(for: key).first
     }
     
     /// attributes for name
@@ -178,9 +180,7 @@ extension CKTodo {
     /// - Parameter name: String
     /// - Returns: [CKAttribute]
     public func attribute(for name: String) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: name).first
-        }
+        return attributes(for: name).first
     }
     
     /// set attrs

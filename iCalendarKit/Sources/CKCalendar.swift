@@ -23,7 +23,10 @@ extension CKCalendar {
 }
 
 extension CKCalendar.AttributeKey: CKRegularable {
-    
+    /// String
+    internal var name: String {
+        return rawValue
+    }
     /// is mutable
     internal var mutable: Bool {
         false
@@ -80,6 +83,7 @@ public class CKCalendar {
         todos = try CKTodo.todos(from: &contents)
         // 解析属性
         attributes = try CKAttribute.attributes(from: &contents, withKeys: AttributeKey.allCases)
+
     }
     
     /// get CKCalendar Array
@@ -500,9 +504,7 @@ extension CKCalendar {
     /// - Parameter key: AttributeKey
     /// - Returns: CKAttribute?
     public func attribute(for key: AttributeKey) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: key).first
-        }
+        return attributes(for: key).first
     }
     
     /// attributes for name
@@ -518,9 +520,7 @@ extension CKCalendar {
     /// - Parameter name: String
     /// - Returns: [CKAttribute]
     public func attribute(for name: String) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: name).first
-        }
+        return attributes(for: name).first
     }
     
     /// set attrs

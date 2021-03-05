@@ -28,6 +28,10 @@ extension CKDaylight {
 }
 
 extension CKDaylight.AttributeKey: CKRegularable {
+    /// String
+    internal var name: String {
+        return rawValue
+    }
     /// mutable
     internal var mutable: Bool {
         switch self {
@@ -36,7 +40,6 @@ extension CKDaylight.AttributeKey: CKRegularable {
         default: return false
         }
     }
-    
     /// pattern
     internal var pattern: String {
         return #"(\r\n)\#(rawValue)([\s\S]*?)(\r\n)"#
@@ -102,9 +105,7 @@ extension CKDaylight {
     /// - Parameter key: AttributeKey
     /// - Returns: CKAttribute?
     public func attribute(for key: AttributeKey) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: key).first
-        }
+        return attributes(for: key).first
     }
     
     /// attributes for name
@@ -120,9 +121,7 @@ extension CKDaylight {
     /// - Parameter name: String
     /// - Returns: [CKAttribute]
     public func attribute(for name: String) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: name).first
-        }
+        return attributes(for: name).first
     }
     
     /// set attrs

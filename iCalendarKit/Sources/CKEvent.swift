@@ -30,7 +30,7 @@ extension CKEvent {
         /**
          The following are OPTIONAL, but MUST NOT occur more than once.
          */
-        case CLASS, CREATED, DESCRIPTION, GEO, LASTMOD = "LAST-MOD", LOCATION, PRIORITY, SEQ, STATUS, SUMMARY, TRANSP, URL, RECURID, ORGANIZER
+        case CLASS, CREATED, DESCRIPTION, GEO, LASTMOD = "LAST-MODIFIED", LOCATION, PRIORITY, SEQ, STATUS, SUMMARY, TRANSP, URL, RECURID, ORGANIZER
         /**
          The following are OPTIONAL,  and MAY occur more than once.
          */
@@ -39,7 +39,10 @@ extension CKEvent {
 }
 
 extension CKEvent.AttributeKey: CKRegularable {
-    
+    /// String
+    internal var name: String {
+        return rawValue
+    }
     /// mutable
     internal var mutable: Bool {
         switch self {
@@ -48,7 +51,6 @@ extension CKEvent.AttributeKey: CKRegularable {
         default: return false
         }
     }
-    
     /// pattern
     internal var pattern: String {
         return #"(\r\n)\#(rawValue)([\s\S]*?)(\r\n)"#
@@ -165,9 +167,7 @@ extension CKEvent {
     /// - Parameter key: AttributeKey
     /// - Returns: CKAttribute?
     public func attribute(for key: AttributeKey) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: key).first
-        }
+        return attributes(for: key).first
     }
     
     /// attributes for name
@@ -183,9 +183,7 @@ extension CKEvent {
     /// - Parameter name: String
     /// - Returns: [CKAttribute]
     public func attribute(for name: String) -> CKAttribute? {
-        return lock.hub.safe {
-            return attributes(for: name).first
-        }
+        return attributes(for: name).first
     }
     
     /// set attrs
