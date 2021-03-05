@@ -68,4 +68,3 @@ public class CKSerialization {
         return data
     }
 }
-
